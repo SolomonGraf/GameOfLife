@@ -1,7 +1,7 @@
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -13,13 +13,15 @@ public class GameOfLife implements Runnable {
         frame.setIconImage(icon.getImage());
         final GameBoard gb = new GameBoard();
         frame.add(gb,BorderLayout.CENTER);
-        frame.add(createButtonBar(gb), BorderLayout.NORTH);
 
         Timer timer = new Timer(200, e -> {
             if (!gb.isPaused()) {
                 gb.update();
             }
         });
+
+        frame.add(createButtonBar(gb, timer), BorderLayout.NORTH);
+
         timer.start();
 
         frame.setLocation(0, 0);
@@ -29,36 +31,50 @@ public class GameOfLife implements Runnable {
         frame.setVisible(true);
     }
 
-    private JPanel createButtonBar(GameBoard gameBoard) {
+    private JPanel createButtonBar(GameBoard gameBoard, Timer timer) {
         JButton clearButton = new JButton("Clear");
         JButton startStopButton = new JButton("Start");
         JButton nextButton = new JButton("Next");
 
-        String[] modes = {"Manual","Select"};
+        ButtonGroup modeButtons = new ButtonGroup();
+        JRadioButton selectButton = new JRadioButton("Select", false);
+        JRadioButton manualButton = new JRadioButton("Manual", true);
+        JLabel delaySliderLabel = new JLabel("Delay: ");
+        JSlider delaySlider = new JSlider(100,300,200);
+
+        modeButtons.add(selectButton);
+        modeButtons.add(manualButton);
 
         JPanel toolbar = new JPanel(new FlowLayout());
         toolbar.add(clearButton);
         toolbar.add(startStopButton);
         toolbar.add(nextButton);
+        toolbar.add(selectButton);
+        toolbar.add(manualButton);
+        toolbar.add(delaySliderLabel);
+        toolbar.add(delaySlider);
 
-        clearButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                gameBoard.clear();
-                if (!gameBoard.isPaused()) {
-                    gameBoard.startStop();
-                    startStopButton.setText("Start");
-                }
+        clearButton.addActionListener(e -> {
+            gameBoard.clear();
+            if (!gameBoard.isPaused()) {
+                gameBoard.startStop();
+                startStopButton.setText("Start");
+            }
+        });
+        startStopButton.addActionListener(e -> {
+            boolean paused = gameBoard.startStop();
+            startStopButton.setText(paused ? "Start" : "Stop");
+            manualButton.setSelected(true);
+            gameBoard.setManualMode();
+        });
+        nextButton.addActionListener(e -> {
+            if (gameBoard.isPaused()) {
+                gameBoard.update();
             }
         });
 
-        startStopButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                boolean paused = gameBoard.startStop();
-                startStopButton.setText(paused ? "Start" : "Stop");
-            }
-        });
+        selectButton.addActionListener(e -> gameBoard.setSelectMode());
+        manualButton.addActionListener(e -> gameBoard.setManualMode());
 
         gameBoard.addMouseListener(new MouseAdapter() {
             @Override
@@ -71,14 +87,7 @@ public class GameOfLife implements Runnable {
             }
         });
 
-        nextButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (gameBoard.isPaused()) {
-                    gameBoard.update();
-                }
-            }
-        });
+        delaySlider.addChangeListener(e -> timer.setDelay(delaySlider.getValue()));
 
         return toolbar;
     }

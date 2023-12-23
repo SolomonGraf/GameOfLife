@@ -42,8 +42,8 @@ public class GameBoard extends JComponent implements Mode {
         }
         @Override
         public void handle(MouseEvent e) {
-            int endRow = getArrayValue(e.getY());
-            int endColumn = getArrayValue(e.getX());
+            int endRow = getArrayValue(e.getY()) + 1;
+            int endColumn = getArrayValue(e.getX()) + 1;
             currentSelection = new Selection(Math.min(startRow,endRow),Math.min(startColumn,endColumn),
                     Math.abs(startRow - endRow),Math.abs(startColumn - endColumn));
             mode = new SelectStartMode();
@@ -135,15 +135,17 @@ public class GameBoard extends JComponent implements Mode {
 
         if (mode.getClass().equals(SelectEndMode.class)) {
             g.setColor(Constants.OFF_WHITE);
-            g.fillOval(((SelectEndMode) mode).getStartColumn() * Constants.SQUARE_SIZE - 10,
-                    ((SelectEndMode) mode).getStartRow() * Constants.SQUARE_SIZE - 10, 20, 20);
+            g.fillOval(((SelectEndMode) mode).getStartColumn() * Constants.SQUARE_SIZE - 5,
+                    ((SelectEndMode) mode).getStartRow() * Constants.SQUARE_SIZE - 5, 10, 10);
         } else if (mode.getClass().equals(SelectStartMode.class)) {
             if (currentSelection != null) {
                 g.setColor(Constants.OFF_WHITE);
-                g.drawRect(currentSelection.getColumn() * Constants.SQUARE_SIZE,
-                        currentSelection.getRow() * Constants.SQUARE_SIZE,
-                        currentSelection.getLength() * Constants.SQUARE_SIZE,
-                        currentSelection.getHeight() * Constants.SQUARE_SIZE);
+                ((Graphics2D) g).setStroke(new BasicStroke(3));
+                g.drawRect(currentSelection.column() * Constants.SQUARE_SIZE,
+                        currentSelection.row() * Constants.SQUARE_SIZE,
+                        currentSelection.length() * Constants.SQUARE_SIZE,
+                        currentSelection.height() * Constants.SQUARE_SIZE);
+                ((Graphics2D) g).setStroke(new BasicStroke(1));
             }
         }
 
@@ -181,10 +183,12 @@ public class GameBoard extends JComponent implements Mode {
     public void setManualMode() {
         currentSelection = null;
         mode = new ManualMode();
+        repaint();
     }
 
     public void setSelectMode() {
         mode = new SelectStartMode();
+        repaint();
     }
 
     // Aux functions
