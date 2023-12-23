@@ -24,19 +24,19 @@ public class GameBoard extends JComponent implements Mode {
         }
     }
 
-    public class SelectStartMode implements Mode {
+    public class CopyStartMode implements Mode {
         @Override
         public void handle(MouseEvent e) {
-            mode = new SelectEndMode(getArrayValue(e.getY()),getArrayValue(e.getX()));
+            mode = new CopyEndMode(getArrayValue(e.getY()),getArrayValue(e.getX()));
         }
     }
 
-    public class SelectEndMode implements Mode {
+    public class CopyEndMode implements Mode {
 
         private final int startRow;
         private final int startColumn;
 
-        public SelectEndMode(int startRow, int startColumn) {
+        public CopyEndMode(int startRow, int startColumn) {
             this.startRow = startRow;
             this.startColumn = startColumn;
         }
@@ -46,7 +46,7 @@ public class GameBoard extends JComponent implements Mode {
             int endColumn = getArrayValue(e.getX()) + 1;
             currentSelection = new Selection(Math.min(startRow,endRow),Math.min(startColumn,endColumn),
                     Math.abs(startRow - endRow),Math.abs(startColumn - endColumn));
-            mode = new SelectStartMode();
+            mode = new CopyStartMode();
         }
 
         public int getStartRow() {
@@ -55,6 +55,14 @@ public class GameBoard extends JComponent implements Mode {
 
         public int getStartColumn() {
             return startColumn;
+        }
+    }
+
+    public class PasteMode implements Mode {
+        @Override
+        public void handle(MouseEvent e) {
+            model.paste(getArrayValue(e.getY()),getArrayValue(e.getX()));
+            repaint();
         }
     }
 
@@ -68,11 +76,23 @@ public class GameBoard extends JComponent implements Mode {
         }
 
         public void draw(Graphics g) {
-            g.setColor(model.isHighlighted(row,column) ? Color.DARK_GRAY : Color.GRAY);
-            g.fillRect(column*Constants.SQUARE_SIZE,row*Constants.SQUARE_SIZE,Constants.SQUARE_SIZE,Constants.SQUARE_SIZE);
+//            int mouseRow = getArrayValue(MouseInfo.getPointerInfo().getLocation().y);
+//            int mouseColumn = getArrayValue(MouseInfo.getPointerInfo().getLocation().x);
+//            if (model.isPreviewed(row,column,mouseRow,mouseColumn) && inMode(PasteMode.class)) {
+//                g.setColor(Constants.EPHEMERAL_DARKGREY);
+//            } else if (model.isInPreview(row,column,mouseRow,mouseColumn) && inMode(PasteMode.class)) {
+//                g.setColor(Constants.EPHEMERAL_GREY);
+            if (model.isHighlighted(row,column)) {
+                g.setColor(Color.DARK_GRAY);
+            } else {
+                g.setColor(Color.GRAY);
+            }
+            g.fillRect(column*Constants.SQUARE_SIZE,row*Constants.SQUARE_SIZE,
+                    Constants.SQUARE_SIZE,Constants.SQUARE_SIZE);
             g.setColor(Color.BLACK);
             ((Graphics2D) g).setStroke(new BasicStroke(2));
-            g.drawRect(column*Constants.SQUARE_SIZE,row*Constants.SQUARE_SIZE,Constants.SQUARE_SIZE,Constants.SQUARE_SIZE);
+            g.drawRect(column*Constants.SQUARE_SIZE,row*Constants.SQUARE_SIZE,
+                    Constants.SQUARE_SIZE,Constants.SQUARE_SIZE);
             ((Graphics2D) g).setStroke(new BasicStroke(1));
         }
 
@@ -84,7 +104,7 @@ public class GameBoard extends JComponent implements Mode {
         }
 
         public void handle() {
-            if (mode.getClass().equals(ManualMode.class)) {
+            if (inMode(ManualMode.class)) {
                 model.flip(row, column);
             }
         }
@@ -133,11 +153,11 @@ public class GameBoard extends JComponent implements Mode {
             }
         }
 
-        if (mode.getClass().equals(SelectEndMode.class)) {
+        if (inMode(CopyEndMode.class)) {
             g.setColor(Constants.OFF_WHITE);
-            g.fillOval(((SelectEndMode) mode).getStartColumn() * Constants.SQUARE_SIZE - 5,
-                    ((SelectEndMode) mode).getStartRow() * Constants.SQUARE_SIZE - 5, 10, 10);
-        } else if (mode.getClass().equals(SelectStartMode.class)) {
+            g.fillOval(((CopyEndMode) mode).getStartColumn() * Constants.SQUARE_SIZE - 5,
+                    ((CopyEndMode) mode).getStartRow() * Constants.SQUARE_SIZE - 5, 10, 10);
+        } else if (inMode(CopyStartMode.class)) {
             if (currentSelection != null) {
                 g.setColor(Constants.OFF_WHITE);
                 ((Graphics2D) g).setStroke(new BasicStroke(3));
@@ -178,6 +198,12 @@ public class GameBoard extends JComponent implements Mode {
         repaint();
     }
 
+    public void copy() {
+        if (inMode(CopyStartMode.class) && currentSelection != null){
+            this.model.copy(currentSelection);
+        }
+    }
+
     // Mode Changes
 
     public void setManualMode() {
@@ -186,8 +212,13 @@ public class GameBoard extends JComponent implements Mode {
         repaint();
     }
 
-    public void setSelectMode() {
-        mode = new SelectStartMode();
+    public void setCopyMode() {
+        mode = new CopyStartMode();
+        repaint();
+    }
+
+    public void setPasteMode() {
+        mode = new PasteMode();
         repaint();
     }
 
@@ -201,4 +232,11 @@ public class GameBoard extends JComponent implements Mode {
         return v / Constants.SQUARE_SIZE;
     }
 
+    private boolean inMode(Class<?> mode) {
+        return this.mode.getClass().equals(mode);
+    }
+
+    public boolean inPasteMode() {
+        return inMode(PasteMode.class);
+    }
 }
