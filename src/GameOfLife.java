@@ -34,6 +34,8 @@ public class GameOfLife implements Runnable {
         JButton startStopButton = new JButton("Start");
         JButton nextButton = new JButton("Next");
 
+        String[] modes = {"Manual","Select"};
+
         JPanel toolbar = new JPanel(new FlowLayout());
         toolbar.add(clearButton);
         toolbar.add(startStopButton);
