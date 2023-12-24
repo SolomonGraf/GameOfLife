@@ -8,6 +8,7 @@ This project was worked on over my winter break in freshman year of college.
 
 ### Planned Functionalities
 - Save to File w/ Multiple Save Files
+- Delete saves
 - Save between Open/Close of program
 - Load to clipboard from file
 - Load to clipboard from text entry in "." / "0" formatting
