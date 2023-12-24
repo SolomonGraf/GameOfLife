@@ -11,8 +11,10 @@ This project was worked on over my winter break in freshman year of college.
 - Save between Open/Close of program
 - Load to clipboard from file
 - Load to clipboard from text entry in "." / "0" formatting
+- Implement transform features such as rotate and reverse
+- Adding ability to change rules
 
 ### Planned Changes
-- Converting Manual/Copy/Paste modes to one mode that interprets mouse behavior
+- Rework Manual/Copy/Paste modes to one mode that interprets mouse behavior
 - Implement keybinds for Start/Stop
 - Automatic stability detection
