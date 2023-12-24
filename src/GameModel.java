@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class GameModel {
@@ -7,6 +8,8 @@ public class GameModel {
     private final int rows;
     private final int columns;
     private boolean[][] board;
+    private boolean[] births;
+    private boolean[] survivals;
 
     private boolean[][] clipboard;
 
@@ -14,6 +17,8 @@ public class GameModel {
         this.rows = rows;
         this.columns = columns;
         this.board = new boolean[rows][columns];
+        this.births = new boolean[]{false,false, false, true, false, false, false, false, false};
+        this.survivals = new boolean[]{false,false, true, true, false, false, false, false, false};
     }
 
     public void update() {
@@ -22,9 +27,9 @@ public class GameModel {
             for (int column = 0; column < columns; column++) {
                 int neighbors = checkNeighbors(row,column);
                 if (board[row][column]) {
-                    newBoard[row][column] = neighbors == 2 || neighbors == 3;
+                    newBoard[row][column] = survivals[neighbors];
                 } else {
-                    newBoard[row][column] = neighbors == 3;
+                    newBoard[row][column] = births[neighbors];
                 }
             }
         }
