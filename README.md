@@ -12,7 +12,7 @@ This project was worked on over my winter break in freshman year of college.
 - Load to clipboard from file
 - Load to clipboard from text entry in "." / "0" formatting
 - Implement transform features such as rotate and reverse
-- Adding ability to change rules
+- ~~Adding ability to change rules~~ **Done**
 
 ### Planned Changes
 - Rework Manual/Copy/Paste modes to one mode that interprets mouse behavior

@@ -33,6 +33,7 @@ public class GameOfLife implements Runnable {
         JButton clearButton = new JButton("Clear");
         JButton startStopButton = new JButton("Start");
         JButton nextButton = new JButton("Next");
+        JButton rulesButton = new JButton("Change Rules");
 
         ButtonGroup modeButtons = new ButtonGroup();
         JRadioButton copyButton = new JRadioButton("Copy", false);
@@ -50,6 +51,7 @@ public class GameOfLife implements Runnable {
         toolbar.add(clearButton);
         toolbar.add(startStopButton);
         toolbar.add(nextButton);
+        toolbar.add(rulesButton);
         toolbar.add(manualButton);
         toolbar.add(copyButton);
         toolbar.add(pasteButton);
@@ -72,6 +74,16 @@ public class GameOfLife implements Runnable {
         nextButton.addActionListener(e -> {
             if (gameBoard.isPaused()) {
                 gameBoard.update();
+            }
+        });
+        rulesButton.addActionListener(e -> {
+            String input = JOptionPane.showInputDialog((Component) gameBoard,"Enter Rules",
+                    "B3/S23");
+            try {
+                gameBoard.changeRules(input);
+                startStopButton.setText("Start");
+            } catch (IllegalArgumentException iae) {
+                JOptionPane.showMessageDialog(gameBoard, "Incorrect formatting for rules");
             }
         });
 

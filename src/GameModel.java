@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,8 +18,8 @@ public class GameModel {
         this.rows = rows;
         this.columns = columns;
         this.board = new boolean[rows][columns];
-        this.births = new boolean[]{false,false, false, true, false, false, false, false, false};
-        this.survivals = new boolean[]{false,false, true, true, false, false, false, false, false};
+        this.births = new boolean[]{false,false, true, false, false, false, false, false, false};
+        this.survivals = new boolean[]{false,false, false, false, false, false, false, false, false};
     }
 
     public void update() {
@@ -93,6 +94,20 @@ public class GameModel {
 
     public void flip(int row, int column) {
         board[row][column] = !board[row][column];
+    }
+
+    public void rules(String newRules) {
+        if (!newRules.matches("^B[0-9]*/S[0-9]*$")) {
+            throw new IllegalArgumentException("Must be in format B#/S#");
+        }
+        String[] birthRules = newRules.split("/")[0].substring(1).split("");
+        String[] survivalRules = newRules.split("/")[1].substring(1).split("");
+        for (int i = 0; i < births.length; i++) {
+            births[i] = Arrays.asList(birthRules).contains(String.valueOf(i));
+        }
+        for (int i = 0; i < survivals.length; i++) {
+            survivals[i] = Arrays.asList(survivalRules).contains(String.valueOf(i));
+        }
     }
 
     public void clear() {

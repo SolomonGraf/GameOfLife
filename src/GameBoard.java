@@ -211,6 +211,11 @@ public class GameBoard extends JComponent implements Mode {
         model.save(filepath);
     }
 
+    public void changeRules(String input) throws IllegalArgumentException {
+        paused = true;
+        model.rules(input);
+    }
+
     // Mode Changes
 
     public void setManualMode() {
