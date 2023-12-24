@@ -1,3 +1,7 @@
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
 public class GameModel {
 
     private final int rows;
@@ -103,6 +107,36 @@ public class GameModel {
             for (int i = 0; i < clipboard.length; i++) {
                 System.arraycopy(clipboard[i], 0, board[row + i], column, clipboard[i].length);
             }
+        }
+    }
+
+    public void save(String filepath) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(filepath));
+        for (boolean[] line : board) {
+            StringBuilder string = new StringBuilder(line.length);
+            for (boolean b : line) {
+                string.append(b ? "0" : ".");
+            }
+            writer.write(string.toString());
+            writer.newLine();
+        }
+        writer.close();
+    }
+
+    public void load(String filepath) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(filepath));
+        List<String> lines = reader.lines().toList();
+        List<boolean[]> booleanLines = new ArrayList<>();
+        for (String line : lines) {
+            boolean[] values = new boolean[line.length()];
+            for (int i = 0; i < line.length(); i++) {
+                values[i] = String.valueOf(line.charAt(i)).equals("0");
+            }
+            booleanLines.add(values);
+        }
+        boolean[][] newBoard = new boolean[Math.max(rows,lines.get(0).length())][Math.max(columns,lines.size())];
+        for (int row = 0; row < rows; row++) {
+            System.arraycopy(booleanLines.get(row),0,newBoard[row],0,booleanLines.get(row).length);
         }
     }
 }

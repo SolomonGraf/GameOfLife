@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 
 public class GameBoard extends JComponent implements Mode {
 
@@ -11,7 +12,7 @@ public class GameBoard extends JComponent implements Mode {
     private Mode mode;
     private Selection currentSelection;
 
-    public class ManualMode implements Mode {
+    private class ManualMode implements Mode {
         @Override
         public void handle(MouseEvent e) {
             for (int row = 0; row < model.getRows(); row++) {
@@ -24,14 +25,14 @@ public class GameBoard extends JComponent implements Mode {
         }
     }
 
-    public class CopyStartMode implements Mode {
+    private class CopyStartMode implements Mode {
         @Override
         public void handle(MouseEvent e) {
             mode = new CopyEndMode(getArrayValue(e.getY()),getArrayValue(e.getX()));
         }
     }
 
-    public class CopyEndMode implements Mode {
+    private class CopyEndMode implements Mode {
 
         private final int startRow;
         private final int startColumn;
@@ -47,6 +48,9 @@ public class GameBoard extends JComponent implements Mode {
             currentSelection = new Selection(Math.min(startRow,endRow),Math.min(startColumn,endColumn),
                     Math.abs(startRow - endRow),Math.abs(startColumn - endColumn));
             mode = new CopyStartMode();
+            if (currentSelection != null){
+                model.copy(currentSelection);
+            }
         }
 
         public int getStartRow() {
@@ -58,7 +62,7 @@ public class GameBoard extends JComponent implements Mode {
         }
     }
 
-    public class PasteMode implements Mode {
+    private class PasteMode implements Mode {
         @Override
         public void handle(MouseEvent e) {
             model.paste(getArrayValue(e.getY()),getArrayValue(e.getX()));
@@ -66,7 +70,7 @@ public class GameBoard extends JComponent implements Mode {
         }
     }
 
-    class GameSquare {
+    private class GameSquare {
         private final int row;
         private final int column;
 
@@ -90,7 +94,7 @@ public class GameBoard extends JComponent implements Mode {
             g.fillRect(column*Constants.SQUARE_SIZE,row*Constants.SQUARE_SIZE,
                     Constants.SQUARE_SIZE,Constants.SQUARE_SIZE);
             g.setColor(Color.BLACK);
-            ((Graphics2D) g).setStroke(new BasicStroke(2));
+            ((Graphics2D) g).setStroke(new BasicStroke(1.25F));
             g.drawRect(column*Constants.SQUARE_SIZE,row*Constants.SQUARE_SIZE,
                     Constants.SQUARE_SIZE,Constants.SQUARE_SIZE);
             ((Graphics2D) g).setStroke(new BasicStroke(1));
@@ -155,12 +159,12 @@ public class GameBoard extends JComponent implements Mode {
 
         if (inMode(CopyEndMode.class)) {
             g.setColor(Constants.OFF_WHITE);
-            g.fillOval(((CopyEndMode) mode).getStartColumn() * Constants.SQUARE_SIZE - 5,
-                    ((CopyEndMode) mode).getStartRow() * Constants.SQUARE_SIZE - 5, 10, 10);
+            g.fillOval(((CopyEndMode) mode).getStartColumn() * Constants.SQUARE_SIZE - 3,
+                    ((CopyEndMode) mode).getStartRow() * Constants.SQUARE_SIZE - 3, 6, 6);
         } else if (inMode(CopyStartMode.class)) {
             if (currentSelection != null) {
                 g.setColor(Constants.OFF_WHITE);
-                ((Graphics2D) g).setStroke(new BasicStroke(3));
+                ((Graphics2D) g).setStroke(new BasicStroke(1.5F));
                 g.drawRect(currentSelection.column() * Constants.SQUARE_SIZE,
                         currentSelection.row() * Constants.SQUARE_SIZE,
                         currentSelection.length() * Constants.SQUARE_SIZE,
@@ -198,10 +202,13 @@ public class GameBoard extends JComponent implements Mode {
         repaint();
     }
 
-    public void copy() {
-        if (inMode(CopyStartMode.class) && currentSelection != null){
-            this.model.copy(currentSelection);
-        }
+    public void load(String filePath) throws IOException {
+        model.load(filePath);
+        repaint();
+    }
+
+    public void save(String filepath) throws IOException {
+        model.save(filepath);
     }
 
     // Mode Changes
@@ -228,15 +235,11 @@ public class GameBoard extends JComponent implements Mode {
         return paused;
     }
 
-    public int getArrayValue(int v) {
+    private int getArrayValue(int v) {
         return v / Constants.SQUARE_SIZE;
     }
 
     private boolean inMode(Class<?> mode) {
         return this.mode.getClass().equals(mode);
-    }
-
-    public boolean inPasteMode() {
-        return inMode(PasteMode.class);
     }
 }
